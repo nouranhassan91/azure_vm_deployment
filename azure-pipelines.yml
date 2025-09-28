@@ -10,15 +10,6 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
 - task: TerraformInstaller@1
   inputs:
     terraformVersion: 'latest'
-
-- task: TerraformTask@5
-  inputs:
-    provider: 'azurerm'
-    command: 'init'
-    backendServiceArm: 'azure_vm_deployment'

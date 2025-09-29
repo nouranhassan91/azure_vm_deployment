@@ -38,6 +38,8 @@ azure-vm-deployment-test/
 
 
 🧪 What the Pipeline Does
+
+
 🟦 Terraform Stage
 
 Installs Terraform

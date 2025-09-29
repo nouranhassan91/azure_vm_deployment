@@ -1,0 +1,14 @@
+- name: Start Azure VM
+  hosts: localhost
+  connection: local
+
+  vars:
+    resource_group_name: "<resource-group-name>"  
+    vm_name: "<vm-name>"                         
+
+  tasks:
+    - name: Start virtual machine
+      azure.azcollection.azure_rm_virtualmachine:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ vm_name }}"
+        state: started

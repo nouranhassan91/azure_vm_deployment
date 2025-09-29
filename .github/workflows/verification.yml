@@ -1,0 +1,57 @@
+name: Azure Terraform + Ansible Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  vmName: demo-vm
+  resourceGroup: vm-demo-rg
+  location: eastus
+
+jobs:
+  terraform:
+    name: Terraform Init, Plan, Apply
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+  ansible:
+    name: Run Ansible Playbook
+    needs: terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Ansible and Azure collection
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          ansible-galaxy collection install azure.azcollection
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook ansible/playbook.yml

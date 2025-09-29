@@ -1,0 +1,54 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  vmName: 'demo-vm'
+  resourceGroup: 'vm-demo-rg'
+  location: 'eastus'
+
+stages:
+- stage: Terraform
+  jobs:
+  - job: TerraformInitPlanApply
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: TerraformTaskV5@5
+      displayName: 'Terraform Init'
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: 'Your Azure Service Connection'
+
+    - task: TerraformTaskV5@5
+      displayName: 'Terraform Plan'
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        environmentServiceNameAzureRM: 'Your Azure Service Connection'
+
+    - task: TerraformTaskV5@5
+      displayName: 'Terraform Apply'
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        environmentServiceNameAzureRM: 'Your Azure Service Connection'
+        args: '-auto-approve'
+
+- stage: Ansible
+  dependsOn: Terraform
+  jobs:
+  - job: RunAnsible
+    steps:
+    - script: |
+        sudo apt-get update
+        sudo apt-get install -y ansible
+        ansible-galaxy collection install azure.azcollection
+        ansible-playbook ansible/playbook.yml
+      displayName: 'Run Ansible Playbook'
+	  
